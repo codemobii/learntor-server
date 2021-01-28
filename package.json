@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "webpack-dev-server --mode development --hot --open --port $PORT",
+    "build": "npm i -dev && webpack --mode production",
+    "heroku-postbuild": "npm build"
   },
   "keywords": [],
   "author": "",
