@@ -1,25 +1,51 @@
 const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
 
-var transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "colourjim@gmail.com",
-    pass: "Ihavenolife1",
-  },
-});
+const createTransporter = async () => {
+  const oauth2Client = new OAuth2(
+    "560477928194-prrhl53ab9m835l8ei8bk8tf9qga5uej.apps.googleusercontent.com",
+    "5oq3UbW7UORTDvdqLnO3fj_M",
+    "https://developers.google.com/oauthplayground"
+  );
 
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("Server is ready to take our messages");
-  }
-});
+  oauth2Client.setCredentials({
+    refresh_token:
+      "1//04YkuFqWZ_4N2CgYIARAAGAQSNwF-L9Ir8glGP7KNnE0Nry8b4aB0o_S7XVxOW1ASio4cRkCs6ecAf-qlp_pvrhOAvPe3GwXQgQI",
+  });
+
+  const accessToken = await new Promise((resolve, reject) => {
+    oauth2Client.getAccessToken((err, token) => {
+      if (err) {
+        reject();
+      }
+      resolve(token);
+    });
+  });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user: "colourjim@gmail.com",
+      accessToken,
+      clientId:
+        "560477928194-prrhl53ab9m835l8ei8bk8tf9qga5uej.apps.googleusercontent.com",
+      clientSecret: "5oq3UbW7UORTDvdqLnO3fj_M",
+      refreshToken:
+        "1//04YkuFqWZ_4N2CgYIARAAGAQSNwF-L9Ir8glGP7KNnE0Nry8b4aB0o_S7XVxOW1ASio4cRkCs6ecAf-qlp_pvrhOAvPe3GwXQgQI",
+    },
+  });
+
+  return transporter;
+};
 
 exports.useEmail = () => {
   var status;
 
-  const sendEmail = (email, subject, text) => {
+  const sendEmail = async (email, subject, text) => {
+    let emailTransporter = await createTransporter();
+
     // Pass options
     var mailOptions = {
       from: "colourjim@gmail.com",
@@ -198,7 +224,7 @@ table[class=body] .article {
 `,
     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    emailTransporter.sendMail(mailOptions, function (error, info) {
       if (info) {
         status = true;
       } else {
