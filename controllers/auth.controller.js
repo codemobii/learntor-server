@@ -63,6 +63,7 @@ exports.login = (request, response) => {
       if (request.body.password !== user.password) {
         response.status(400).send({
           message: "Passwords does not match",
+          e: true,
         });
       } else {
         //   create JWT token
@@ -83,10 +84,11 @@ exports.login = (request, response) => {
         });
       }
     })
-    .catch((e) => {
+    .catch((err) => {
       response.status(404).send({
-        message: "Email or password incorrect",
-        e,
+        message: "No account associated with this email",
+        e: true,
+        err,
       });
     });
 };
@@ -119,7 +121,7 @@ exports.forgotPassword = (request, response) => {
 
       response.status(200).send({
         message: "Reset code sent, check your email",
-        user: request.body.email,
+        user,
       });
     })
     .catch((err) => {
