@@ -233,7 +233,8 @@ exports.registerCourse = (request, response) => {
                         `Congratulations!. you have successfully registered for ${course.title} with the course code ${request.body.course}, you can now started following the course.`
                       );
                       response.status(200).send({
-                        message: "Successful",
+                        message:
+                          "You have successful registered for this course",
                         result,
                         e: false,
                       });
@@ -269,7 +270,7 @@ exports.registerCourse = (request, response) => {
           .then((course) => {
             if (course) {
               response.status(200).send({
-                message: "Successful",
+                message: "Welcome back to the course",
                 course,
                 e: false,
               });
@@ -282,7 +283,7 @@ exports.registerCourse = (request, response) => {
           })
           .catch((error) => {
             response.status(404).send({
-              message: "This course was not found",
+              message: "This course not found",
               error,
             });
           });
