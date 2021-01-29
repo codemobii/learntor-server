@@ -239,10 +239,10 @@ exports.registerCourse = (request, response) => {
                         e: false,
                       });
                     })
-                    .catch((error) => {
+                    .catch((e) => {
                       response.status(500).send({
                         message: "Error registering",
-                        error,
+                        e,
                       });
                     });
                 } else {
@@ -259,10 +259,10 @@ exports.registerCourse = (request, response) => {
               });
             }
           })
-          .catch((error) => {
+          .catch((e) => {
             response.status(404).send({
               message: "This course was not found",
-              error,
+              e,
             });
           });
       } else {
@@ -281,10 +281,10 @@ exports.registerCourse = (request, response) => {
               });
             }
           })
-          .catch((error) => {
+          .catch((e) => {
             response.status(404).send({
               message: "This course not found",
-              error,
+              e,
             });
           });
       }
