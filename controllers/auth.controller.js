@@ -230,11 +230,12 @@ exports.registerCourse = (request, response) => {
                       sendEmail(
                         user.email,
                         "Course Registration",
-                        `Congratulations!. you have successfully registered for ${course.title}, you can now started following the course.`
+                        `Congratulations!. you have successfully registered for ${course.title} with the course code ${request.body.course}, you can now started following the course.`
                       );
                       response.status(200).send({
                         message: "Successful",
                         result,
+                        e: false,
                       });
                     })
                     .catch((error) => {
@@ -246,12 +247,14 @@ exports.registerCourse = (request, response) => {
                 } else {
                   response.status(404).send({
                     message: "User not found",
+                    e: true,
                   });
                 }
               });
             } else {
               response.status(404).send({
-                message: "Course not found",
+                message: "Course was not found",
+                e: true,
               });
             }
           })
@@ -268,6 +271,7 @@ exports.registerCourse = (request, response) => {
               response.status(200).send({
                 message: "Successful",
                 course,
+                e: false,
               });
             } else {
               response.status(404).send({
