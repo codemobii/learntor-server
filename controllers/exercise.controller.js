@@ -46,11 +46,29 @@ exports.getExercise = (request, response) => {
 
 exports.answer = (request, response) => {
   Exercise.findById(request.params.questionId)
-    .then((questions) => {
+    .then((question) => {
       //   return success response
+
+      const isCorrect = {
+        question: question.question,
+        answer: question.answer,
+        user_answer: request.body.answer,
+        isCorrect: true,
+      };
+
+      const notCorrect = {
+        question: question.question,
+        answer: question.answer,
+        user_answer: request.body.answer,
+        isCorrect: false,
+      };
+
+      const answer =
+        request.body.answer === question.answer ? isCorrect : notCorrect;
+
       response.status(200).send({
         message: "Successfully",
-        questions,
+        answer,
       });
     })
     .catch((err) => {
