@@ -21,6 +21,10 @@ const CourseSchema = new mongoose.Schema(
       type: String,
     },
 
+    cover: {
+      type: Object,
+    },
+
     startDate: {
       type: Date,
     },

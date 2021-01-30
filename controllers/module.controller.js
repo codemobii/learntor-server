@@ -18,13 +18,14 @@ exports.create = (request, response) => {
 
   // upload image here
   cloudinary.uploader
-    .upload(data.video)
+    .upload(data.video, { resource_type: "video" })
     .then((result) => {
+      console.log(result);
       const module = new Module({
         title: request.body.title,
         course: request.body.course,
         institute: request.body.institute,
-        video: result.url,
+        video: result.secure_url,
         startDate: request.body.startDate,
         endDate: request.body.endDate,
         disabled: false,
@@ -39,7 +40,6 @@ exports.create = (request, response) => {
           response.status(200).send({
             message: "Module created successfully",
             data,
-            result,
           });
         })
         .catch((err) => {

@@ -1,4 +1,12 @@
 const Course = require("../models/course.model");
+const cloudinary = require("cloudinary").v2;
+
+// cloudinary configuration
+cloudinary.config({
+  cloud_name: "digital-specie",
+  api_key: "228755343147422",
+  api_secret: "L7IveOV6v4ZrUJJkXEN2qhZIGDk",
+});
 
 function makeRef(length) {
   var result = "";
@@ -15,32 +23,53 @@ const code = makeRef(3);
 // Create course
 
 exports.create = (request, response) => {
-  // Create a Note
-  const course = new Course({
-    title: request.body.title,
-    courseCode: request.body.courseCode + "-" + code,
-    institute: request.body.institute,
-    instituteName: request.body.instituteName,
-    startDate: request.body.startDate,
-    endDate: request.body.endDate,
-    disabled: false,
-    desc: request.body.desc,
-  });
+  // collected image from a user
+  const data = {
+    cover: request.body.cover,
+  };
 
-  // Save Note in the database
-  course
-    .save()
-    .then((data) => {
-      //   return success response
-      response.status(200).send({
-        message: "Course created successfully",
-        data,
+  // upload image here
+  cloudinary.uploader
+    .upload(data.cover, { resource_type: "video" })
+    .then((result) => {
+      console.log(result);
+      // Create a Note
+      const course = new Course({
+        title: request.body.title,
+        courseCode: request.body.courseCode + "-" + code,
+        institute: request.body.institute,
+        instituteName: request.body.instituteName,
+        startDate: request.body.startDate,
+        endDate: request.body.endDate,
+        disabled: false,
+        desc: request.body.desc,
+        cover: {
+          url: result.secure_url,
+          type: "video",
+        },
       });
+
+      // Save Note in the database
+      course
+        .save()
+        .then((data) => {
+          //   return success response
+          response.status(200).send({
+            message: "Course created successfully",
+            data,
+          });
+        })
+        .catch((err) => {
+          response.status(500).send({
+            message: "Some error occurred while creating the Course.",
+            err,
+          });
+        });
     })
-    .catch((err) => {
+    .catch((e) => {
       response.status(500).send({
-        message: "Some error occurred while creating the Course.",
-        err,
+        message: "Video upload failed",
+        e,
       });
     });
 };

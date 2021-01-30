@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 require("./routes/course.routes.js")(app);
 require("./routes/auth.routes.js")(app);
 require("./routes/module.routes")(app);
+require("./routes/excerise.routes")(app);
 
 // define a simple route
 app.get("/", (req, res) => {
