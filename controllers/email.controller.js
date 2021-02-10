@@ -41,8 +41,6 @@ const createTransporter = async () => {
 };
 
 exports.useEmail = () => {
-  var status;
-
   const sendEmail = async (email, subject, text) => {
     let emailTransporter = await createTransporter();
 
@@ -224,15 +222,8 @@ table[class=body] .article {
 `,
     };
 
-    emailTransporter.sendMail(mailOptions, function (error, info) {
-      if (info) {
-        status = true;
-      } else {
-        status = false;
-        console.log(error);
-      }
-    });
+    emailTransporter.sendMail(mailOptions);
   };
 
-  return { sendEmail, status };
+  return { sendEmail };
 };

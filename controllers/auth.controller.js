@@ -2,10 +2,18 @@ const User = require("../models/user.model");
 const Participant = require("../models/participant.model");
 const Course = require("../models/course.model");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const { useEmail } = require("./email.controller");
+var nodemailer = require("nodemailer");
 
-const { status, sendEmail } = useEmail();
+var transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "colourjim@gmail.com",
+    pass: "Ihavenolife1",
+  },
+});
+
+const { sendEmail } = useEmail();
 
 function makeRef(length) {
   var result = "";
@@ -16,14 +24,6 @@ function makeRef(length) {
   }
   return result;
 }
-
-var transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "colourjim@gmail.com",
-    pass: "Ihavenolife1",
-  },
-});
 
 // Create and Save a new Note
 exports.register = (request, response) => {
@@ -37,11 +37,23 @@ exports.register = (request, response) => {
   user
     .save()
     .then((result) => {
-      sendEmail(
-        request.body.email,
-        "Welcome to Learntor",
-        "Thank you for joining Learntor. We wish to satisfy your learning needs"
-      );
+      // Send email test
+
+      var mailOptions = {
+        from: "colourjim@gmail.com",
+        to: request.body.email,
+        subject: "Sending Email using Node.js",
+        text: "That was easy!",
+      };
+
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+
       response.status(200).send({
         message: "Account Created Successfully",
         result,
@@ -122,6 +134,7 @@ exports.forgotPassword = (request, response) => {
       response.status(200).send({
         message: "Reset code sent, check your email",
         user,
+        code,
       });
     })
     .catch((err) => {
