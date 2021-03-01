@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require('cors');
+const cors = require("cors");
 
 // create express app
 const app = express();
@@ -21,6 +21,7 @@ require("./routes/course.routes.js")(app);
 require("./routes/auth.routes.js")(app);
 require("./routes/module.routes")(app);
 require("./routes/excerise.routes")(app);
+require("./routes/user.routes")(app);
 
 // define a simple route
 app.get("/", (req, res) => {
