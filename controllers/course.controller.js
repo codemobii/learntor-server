@@ -1,4 +1,5 @@
 const Course = require("../models/course.model");
+const user_courseModel = require("../models/user_course.model");
 const cloudinary = require("cloudinary").v2;
 
 // cloudinary configuration
@@ -18,58 +19,41 @@ function makeRef(length) {
   return result;
 }
 
-const code = makeRef(3);
-
 // Create course
 
 exports.create = (request, response) => {
+  const code = makeRef(4);
   // collected image from a user
   const data = {
     cover: request.body.cover,
   };
 
-  // upload image here
-  cloudinary.uploader
-    .upload(data.cover, { resource_type: "video" })
-    .then((result) => {
-      console.log(result);
-      // Create a Note
-      const course = new Course({
-        title: request.body.title,
-        courseCode: request.body.courseCode + "-" + code,
-        institute: request.body.institute,
-        instituteName: request.body.instituteName,
-        startDate: request.body.startDate,
-        endDate: request.body.endDate,
-        disabled: false,
-        desc: request.body.desc,
-        cover: {
-          url: result.secure_url,
-          type: "video",
-        },
-      });
+  const course = new Course({
+    title: request.body.title,
+    courseCode: request.body.courseCode + "-" + code,
+    institute: request.body.institute,
+    instituteName: request.body.instituteName,
+    startDate: request.body.startDate,
+    endDate: request.body.endDate,
+    disabled: false,
+    desc: request.body.desc,
+    cover: data.cover,
+  });
 
-      // Save Note in the database
-      course
-        .save()
-        .then((data) => {
-          //   return success response
-          response.status(200).send({
-            message: "Course created successfully",
-            data,
-          });
-        })
-        .catch((err) => {
-          response.status(500).send({
-            message: "Some error occurred while creating the Course.",
-            err,
-          });
-        });
+  // Save Course in the database
+  course
+    .save()
+    .then((data) => {
+      //   return success response
+      response.status(200).send({
+        message: "Course created successfully",
+        data,
+      });
     })
-    .catch((e) => {
+    .catch((err) => {
       response.status(500).send({
-        message: "Video upload failed",
-        e,
+        message: "Some error occurred while creating the Course.",
+        err,
       });
     });
 };
@@ -77,7 +61,7 @@ exports.create = (request, response) => {
 // Edit course
 
 exports.update = (request, response) => {
-  // Find note and update it with the request body
+  // Find Course and update it with the request body
   Course.findByIdAndUpdate(
     request.params.courseId,
     {
@@ -143,7 +127,7 @@ exports.getCourse = (req, res) => {
     .then((course) => {
       if (!course) {
         return res.status(404).send({
-          message: "Note not found with id " + req.params.courseId,
+          message: "Course not found with id " + req.params.courseId,
         });
       }
       res.status(200).send({
@@ -154,12 +138,57 @@ exports.getCourse = (req, res) => {
     .catch((err) => {
       if (err.kind === "ObjectId") {
         return res.status(404).send({
-          message: "Note not found with id " + req.params.courseId,
+          message: "Course not found with id " + req.params.courseId,
           err,
         });
       }
       return res.status(500).send({
-        message: "Error retrieving note with id " + req.params.courseId,
+        message: "Error retrieving Course with id " + req.params.courseId,
+        err,
+      });
+    });
+};
+
+exports.getUserCourse = (req, res) => {
+  user_courseModel
+    .findOne({ course: req.params.courseId })
+    .then((course) => {
+      if (!course) {
+        return res.status(404).send({
+          message: "Course not found with id " + req.params.courseId,
+        });
+      }
+      res.status(200).send({
+        message: "Successful",
+        course,
+      });
+    })
+    .catch((err) => {
+      if (err.kind === "ObjectId") {
+        return res.status(404).send({
+          message: "Course not found with id " + req.params.courseId,
+          err,
+        });
+      }
+      return res.status(500).send({
+        message: "Error retrieving Course with id " + req.params.courseId,
+        err,
+      });
+    });
+};
+
+exports.getUserCourses = (req, res) => {
+  user_courseModel
+    .find({ user: req.query.user })
+    .then((courses) => {
+      res.status(200).send({
+        message: "Successful",
+        courses,
+      });
+    })
+    .catch((err) => {
+      return res.status(500).send({
+        message: "Error retrieving courses",
         err,
       });
     });

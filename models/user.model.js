@@ -22,7 +22,6 @@ const UserSchema = new mongoose.Schema(
 
     fullname: {
       type: String,
-      required: [true, "Please provide your name"],
       unique: false,
     },
     resetCode: {
@@ -32,6 +31,23 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: Number,
+    },
+
+    firstName: {
+      type: String,
+    },
+
+    lastName: {
+      type: String,
+    },
+
+    token: {
+      type: String,
+      default: null,
+    },
+
+    profilePic: {
+      type: String,
     },
   },
   {

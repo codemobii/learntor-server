@@ -16,43 +16,31 @@ exports.create = (request, response) => {
     video: request.body.video,
   };
 
-  // upload image here
-  cloudinary.uploader
-    .upload(data.video, { resource_type: "video" })
-    .then((result) => {
-      console.log(result);
-      const module = new Module({
-        title: request.body.title,
-        course: request.body.course,
-        institute: request.body.institute,
-        video: result.secure_url,
-        startDate: request.body.startDate,
-        endDate: request.body.endDate,
-        disabled: false,
-        desc: request.body.desc,
-      });
+  const module = new Module({
+    title: request.body.title,
+    course: request.body.course,
+    institute: request.body.institute,
+    video: request.body.video,
+    startDate: request.body.startDate,
+    endDate: request.body.endDate,
+    disabled: false,
+    desc: request.body.desc,
+  });
 
-      // Save Note in the database
-      module
-        .save()
-        .then((data) => {
-          //   return success response
-          response.status(200).send({
-            message: "Module created successfully",
-            data,
-          });
-        })
-        .catch((err) => {
-          response.status(500).send({
-            message: "Some error occurred while creating the module.",
-            err,
-          });
-        });
+  // Save Note in the database
+  module
+    .save()
+    .then((data) => {
+      //   return success response
+      response.status(200).send({
+        message: "Module created successfully",
+        data,
+      });
     })
-    .catch((error) => {
+    .catch((err) => {
       response.status(500).send({
-        message: "Video upload failed",
-        error,
+        message: "Some error occurred while creating the module.",
+        err,
       });
     });
 };

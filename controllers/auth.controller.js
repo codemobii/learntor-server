@@ -3,15 +3,7 @@ const Participant = require("../models/participant.model");
 const Course = require("../models/course.model");
 const jwt = require("jsonwebtoken");
 const { useEmail } = require("./email.controller");
-var nodemailer = require("nodemailer");
-
-var transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "colourjim@gmail.com",
-    pass: "Ihavenolife1",
-  },
-});
+const user_courseModel = require("../models/user_course.model");
 
 const { sendEmail } = useEmail();
 
@@ -30,38 +22,29 @@ exports.register = (request, response) => {
   const user = new User({
     email: request.body.email,
     password: request.body.password,
-    fullname: request.body.fullname,
+    fullname: request.body.fullname || "",
     phone: request.body.phone,
     role: request.body.role || 3,
+    firstName: request.body.firstName,
+    lastName: request.body.lastName,
   });
   user
     .save()
     .then((result) => {
-      // Send email test
-
-      var mailOptions = {
-        from: "colourjim@gmail.com",
-        to: request.body.email,
-        subject: "Sending Email using Node.js",
-        text: "That was easy!",
-      };
-
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Email sent: " + info.response);
-        }
-      });
-
+      sendEmail(
+        request.body.email,
+        "Welcome to Learntor",
+        "Thank you for joining Learntor. We wish to satisfy your learning needs"
+      );
       response.status(200).send({
         message: "Account Created Successfully",
-        result,
+        status: true,
       });
     })
     .catch((error) => {
       response.status(500).send({
         message: "Error creating user",
+        status: false,
         error,
       });
     });
@@ -75,7 +58,7 @@ exports.login = (request, response) => {
       if (request.body.password !== user.password) {
         response.status(400).send({
           message: "Passwords does not match",
-          e: true,
+          status: false,
         });
       } else {
         //   create JWT token
@@ -88,18 +71,35 @@ exports.login = (request, response) => {
           { expiresIn: "24h" }
         );
 
-        //   return success response
-        response.status(200).send({
-          message: "Login Successful",
-          user,
-          token,
-        });
+        User.updateOne(
+          { email: request.body.email },
+          {
+            token: token,
+          },
+          { new: true }
+        )
+          .then(() => {
+            //   return success response
+            response.status(200).send({
+              message: "Login Successful",
+              token,
+              user,
+              status: true,
+            });
+          })
+          .catch(() => {
+            response.status(404).send({
+              message: "No account associated with this email",
+              status: false,
+              err,
+            });
+          });
       }
     })
     .catch((err) => {
       response.status(404).send({
         message: "No account associated with this email",
-        e: true,
+        status: false,
         err,
       });
     });
@@ -133,7 +133,7 @@ exports.forgotPassword = (request, response) => {
 
       response.status(200).send({
         message: "Reset code sent, check your email",
-        user,
+        status: true,
         code,
       });
     })
@@ -155,25 +155,18 @@ exports.forgotPassword = (request, response) => {
 // Verify code
 
 exports.verifyCode = (request, response) => {
-  User.findOne({ email: request.body.email })
+  const code = request.body.resetCode;
+  User.findOne({ resetCode: parseFloat(code) })
     .then((user) => {
-      const code = request.body.resetCode;
-      if (parseFloat(code) !== user.resetCode) {
-        response.status(400).send({
-          message: "Code could not be verified",
-          user,
-        });
-      } else {
-        // return success response
-        response.status(200).send({
-          message: "Code verified successfully",
-          user,
-        });
-      }
+      // return success response
+      response.status(200).send({
+        message: "Code verified successfully",
+        user,
+      });
     })
     .catch((e) => {
       response.status(404).send({
-        message: "Account found",
+        message: "Code could not be verified",
         e,
       });
     });
@@ -182,28 +175,33 @@ exports.verifyCode = (request, response) => {
 // Change password
 
 exports.resetPassword = (request, response) => {
+  const code = request.body.resetCode;
   User.updateOne(
-    { email: request.body.email },
+    { resetCode: parseFloat(code) },
     {
       password: request.body.password,
     },
     { new: true }
   )
     .then((user) => {
-      if (!user) {
+      console.log(user);
+      if (user.n === 0) {
         return response.status(404).send({
-          message: "No user associated with this email",
+          message: "Code doesn't match",
+        });
+      } else {
+        User.findOne({ resetCode: parseFloat(code) }).then((res) => {
+          sendEmail(
+            res.email,
+            "Password Reset Successful",
+            `Your password has been changed successfully`
+          );
+          response.status(200).send({
+            message: "Password reset was successful",
+            user,
+          });
         });
       }
-      sendEmail(
-        request.body.email,
-        "Password Reset Successful",
-        `Your password has been changed successfully`
-      );
-      response.status(200).send({
-        message: "Password reset was successful",
-        user,
-      });
     })
     .catch((err) => {
       if (err.kind === "ObjectId") {
@@ -223,13 +221,15 @@ exports.resetPassword = (request, response) => {
 // Register to course
 
 exports.registerCourse = (request, response) => {
-  Participant.findOne({ user: request.body.user })
-    .then((user) => {
-      console.log(user);
-      if (!user) {
-        Course.findOne({ courseCode: request.body.course })
-          .then((course) => {
-            if (course) {
+  Course.findOne({ courseCode: request.body.course })
+    .then((course) => {
+      if (course) {
+        Participant.findOne({
+          $and: [{ user: request.body.user }, { course: course._id }],
+        })
+          .then((user) => {
+            console.log(user);
+            if (!user) {
               User.findById(request.body.user).then((user) => {
                 if (user) {
                   const participant = new Participant({
@@ -237,20 +237,46 @@ exports.registerCourse = (request, response) => {
                     course: course._id,
                     institute: course.institute,
                   });
+
+                  const UserCouse = new user_courseModel({
+                    title: course.title,
+                    course: course._id,
+                    courseCode: course.courseCode,
+                    institute: course.institute,
+                    instituteName: course.instituteName,
+                    startDate: course.startDate,
+                    endDate: course.endDate,
+                    disabled: false,
+                    desc: course.desc,
+                    cover: {
+                      url: course.cover.url,
+                      type: course.cover.type,
+                    },
+                    user: request.body.user,
+                  });
                   participant
                     .save()
                     .then((result) => {
-                      sendEmail(
-                        user.email,
-                        "Course Registration",
-                        `Congratulations!. you have successfully registered for ${course.title} with the course code ${request.body.course}, you can now started following the course.`
-                      );
-                      response.status(200).send({
-                        message:
-                          "You have successful registered for this course",
-                        result,
-                        e: false,
-                      });
+                      UserCouse.save()
+                        .then((res) => {
+                          sendEmail(
+                            user.email,
+                            "Course Registration",
+                            `Congratulations!. you have successfully registered for ${course.title} with the course code ${request.body.course}, you can now started following the course.`
+                          );
+                          response.status(200).send({
+                            message:
+                              "You have successful registered for this course",
+                            course,
+                            e: false,
+                          });
+                        })
+                        .catch((e) => {
+                          response.status(500).send({
+                            message: "Error registering me",
+                            e,
+                          });
+                        });
                     })
                     .catch((e) => {
                       response.status(500).send({
@@ -266,46 +292,85 @@ exports.registerCourse = (request, response) => {
                 }
               });
             } else {
-              response.status(404).send({
-                message: "Course was not found",
-                e: true,
-              });
+              Course.findOne({ courseCode: request.body.course })
+                .then((course) => {
+                  if (course) {
+                    response.status(200).send({
+                      message: "Welcome back to the course",
+                      course,
+                      e: false,
+                    });
+                  } else {
+                    response.status(404).send({
+                      message: "This course was not found",
+                      error,
+                    });
+                  }
+                })
+                .catch((e) => {
+                  response.status(404).send({
+                    message: "This course not found",
+                    e,
+                  });
+                });
             }
           })
           .catch((e) => {
             response.status(404).send({
-              message: "This course was not found",
+              message: "Account not found",
               e,
             });
           });
       } else {
-        Course.findOne({ courseCode: request.body.course })
-          .then((course) => {
-            if (course) {
-              response.status(200).send({
-                message: "Welcome back to the course",
-                course,
-                e: false,
-              });
-            } else {
-              response.status(404).send({
-                message: "This course was not found",
-                error,
-              });
-            }
-          })
-          .catch((e) => {
-            response.status(404).send({
-              message: "This course not found",
-              e,
-            });
-          });
+        response.status(404).send({
+          message: "Course was not found",
+          e: true,
+        });
       }
     })
     .catch((e) => {
       response.status(404).send({
-        message: "Account not found",
+        message: "This course was not found",
         e,
+      });
+    });
+};
+
+// Logout bro
+
+exports.logout = (request, response) => {
+  User.updateOne(
+    { token: request.body.token },
+    {
+      token: null,
+    },
+    { new: true }
+  )
+    .then((user) => {
+      if (!user) {
+        return response.status(404).send({
+          message: "No user associated with this token",
+          status: false,
+        });
+      }
+      response.status(200).send({
+        message: "Successfully logged out",
+        status: true,
+      });
+    })
+    .catch((err) => {
+      if (err.kind === "ObjectId") {
+        return response.status(404).send({
+          message: "No user associated with this email",
+          err,
+          status: false,
+        });
+      }
+
+      return response.status(500).send({
+        message: "Error sending reset code",
+        err,
+        status: false,
       });
     });
 };

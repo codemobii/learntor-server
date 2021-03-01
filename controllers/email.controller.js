@@ -11,7 +11,7 @@ const createTransporter = async () => {
 
   oauth2Client.setCredentials({
     refresh_token:
-      "1//04YkuFqWZ_4N2CgYIARAAGAQSNwF-L9Ir8glGP7KNnE0Nry8b4aB0o_S7XVxOW1ASio4cRkCs6ecAf-qlp_pvrhOAvPe3GwXQgQI",
+      "1//04E_U1xiCT7naCgYIARAAGAQSNwF-L9IrdWd0Mhu2tbH_LMCSeA_1aNwxCoQdyl4JnoFO0_7CHxs5YQYw7z8GkbtSegP_aIede4w",
   });
 
   const accessToken = await new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ const createTransporter = async () => {
         "560477928194-prrhl53ab9m835l8ei8bk8tf9qga5uej.apps.googleusercontent.com",
       clientSecret: "5oq3UbW7UORTDvdqLnO3fj_M",
       refreshToken:
-        "1//04YkuFqWZ_4N2CgYIARAAGAQSNwF-L9Ir8glGP7KNnE0Nry8b4aB0o_S7XVxOW1ASio4cRkCs6ecAf-qlp_pvrhOAvPe3GwXQgQI",
+        "1//04E_U1xiCT7naCgYIARAAGAQSNwF-L9IrdWd0Mhu2tbH_LMCSeA_1aNwxCoQdyl4JnoFO0_7CHxs5YQYw7z8GkbtSegP_aIede4w",
     },
   });
 
@@ -222,7 +222,13 @@ table[class=body] .article {
 `,
     };
 
-    emailTransporter.sendMail(mailOptions);
+    emailTransporter.sendMail(mailOptions, function (error, info) {
+      if (info) {
+        console.log(info);
+      } else {
+        console.log("error", error);
+      }
+    });
   };
 
   return { sendEmail };

@@ -12,4 +12,10 @@ module.exports = (app) => {
 
   // Update course course
   app.get("/course/:courseId", course.getCourse);
+
+  // Update course course
+  app.get("/user_course/:courseId", course.getUserCourse);
+
+  // Update course course
+  app.get("/user_courses", course.getUserCourses);
 };

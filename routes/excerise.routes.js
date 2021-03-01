@@ -8,5 +8,8 @@ module.exports = (app) => {
   app.get("/exercise", exercise.getExercise);
 
   // Update course course
-  app.post("/exercise/:questionId", exercise.answer);
+  app.post("/result", exercise.result);
+
+  // Update course course
+  app.get("/result/:resultId", exercise.getResult);
 };

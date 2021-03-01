@@ -1,23 +1,25 @@
 const mongoose = require("mongoose");
 
-const ExerciseSchema = new mongoose.Schema(
+const ResultSchema = new mongoose.Schema(
   {
-    question: {
+    user: {
       type: String,
-      required: [true, "No question specified!"],
     },
 
     module: {
       type: String,
     },
 
-    correct: {
+    course: {
       type: String,
     },
 
-    answers: {
+    result: {
       type: Array,
-      required: [true, "Options required"],
+    },
+
+    score: {
+      type: Number,
     },
 
     disabled: {
@@ -31,4 +33,4 @@ const ExerciseSchema = new mongoose.Schema(
 );
 
 module.exports =
-  mongoose.model.Exercise || mongoose.model("Exercise", ExerciseSchema);
+  mongoose.model.Result || mongoose.model("Result", ResultSchema);
