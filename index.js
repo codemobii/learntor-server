@@ -22,6 +22,7 @@ require("./routes/auth.routes.js")(app);
 require("./routes/module.routes")(app);
 require("./routes/excerise.routes")(app);
 require("./routes/user.routes")(app);
+require("./routes/project.routes")(app);
 
 // define a simple route
 app.get("/", (req, res) => {
