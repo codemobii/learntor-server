@@ -8,7 +8,7 @@ module.exports = (app) => {
   app.put("/course/:courseId", course.update);
 
   // Update course course
-  app.get("/course", course.getCourses);
+  app.get("/courses", course.getCourses);
 
   // Update course course
   app.get("/course/:courseId", course.getCourse);
