@@ -45,6 +45,48 @@ exports.create = (request, response) => {
     });
 };
 
+// Edit course
+
+exports.update = (request, response) => {
+  // Find Course and update it with the request body
+  Module.findByIdAndUpdate(
+    request.params.moduleId,
+    {
+      title: request.body.title,
+      video: request.body.video,
+      startDate: request.body.startDate,
+      endDate: request.body.endDate,
+      desc: request.body.desc,
+    },
+    { new: true }
+  )
+    .then((course) => {
+      if (!course) {
+        return response.status(404).send({
+          message: "Module not found with id " + request.params.moduleId,
+        });
+      }
+
+      //   return success response
+      response.status(200).send({
+        message: "Module updated successfully",
+        course,
+      });
+    })
+    .catch((err) => {
+      if (err.kind === "ObjectId") {
+        return response.status(404).send({
+          message: "Module not found with id " + request.params.moduleId,
+          err,
+        });
+      }
+      return response.status(500).send({
+        message: "Error updating module with id " + request.params.moduleId,
+        err,
+      });
+    });
+};
+
 // Get course for a store
 
 exports.getModules = (request, response) => {

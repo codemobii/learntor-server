@@ -12,4 +12,7 @@ module.exports = (app) => {
 
   // Update course course
   app.get("/result/:resultId", exercise.getResult);
+
+  // Update course course
+  app.get("/results/:moduleId", exercise.getResultsForModule);
 };

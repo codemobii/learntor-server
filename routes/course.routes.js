@@ -18,4 +18,7 @@ module.exports = (app) => {
 
   // Update course course
   app.get("/user_courses", course.getUserCourses);
+
+  // Update course course
+  app.get("/participants/:courseId", course.getParticpants);
 };

@@ -1,5 +1,7 @@
 const Course = require("../models/course.model");
 const user_courseModel = require("../models/user_course.model");
+const participantModel = require("../models/participant.model");
+
 const cloudinary = require("cloudinary").v2;
 
 // cloudinary configuration
@@ -28,9 +30,13 @@ exports.create = (request, response) => {
     cover: request.body.cover,
   };
 
+  var str = request.body.title;
+  var matches = str.match(/\b(\w)/g);
+  var acronym = matches.join("");
+
   const course = new Course({
     title: request.body.title,
-    courseCode: request.body.courseCode + "-" + code,
+    courseCode: acronym + "-" + code,
     institute: request.body.institute,
     instituteName: request.body.instituteName,
     startDate: request.body.startDate,
@@ -70,6 +76,7 @@ exports.update = (request, response) => {
       endDate: request.body.endDate,
       disabled: request.body.disabled,
       desc: request.body.desc,
+      cover: request.body.cover,
     },
     { new: true }
   )
@@ -184,6 +191,25 @@ exports.getUserCourses = (req, res) => {
       res.status(200).send({
         message: "Successful",
         courses,
+      });
+    })
+    .catch((err) => {
+      return res.status(500).send({
+        message: "Error retrieving courses",
+        err,
+      });
+    });
+};
+
+//
+
+exports.getParticpants = (req, res) => {
+  participantModel
+    .find({ course: req.params.courseId })
+    .then((participants) => {
+      res.status(200).send({
+        message: "Successful",
+        participants,
       });
     })
     .catch((err) => {

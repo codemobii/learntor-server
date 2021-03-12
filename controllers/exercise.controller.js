@@ -152,6 +152,30 @@ exports.getResult = (request, response) => {
     });
 };
 
+exports.getResultsForModule = (request, response) => {
+  resultModel
+    .find({ module: request.params.moduleId })
+    .then((results) => {
+      //   return success response
+      response.status(200).send({
+        message: "Successfully",
+        results,
+      });
+    })
+    .catch((err) => {
+      if (err.kind === "ObjectId") {
+        return response.status(404).send({
+          message: "Result not found with id " + request.params.resultId,
+          err,
+        });
+      }
+      response.status(500).send({
+        message: "Some error occurred while retrieving result.",
+        err,
+      });
+    });
+};
+
 // Get course for a store
 
 // exports.answer = (request, response) => {
