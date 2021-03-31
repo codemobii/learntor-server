@@ -46,7 +46,7 @@ exports.useEmail = () => {
 
     // Pass options
     var mailOptions = {
-      from: "colourjim@gmail.com",
+      from: '"Learnbase 📖" <colourjim@gmail.com>',
       to: email,
       subject: subject,
       html: `<!doctype html>
@@ -182,8 +182,8 @@ table[class=body] .article {
                             </tr>
                           </tbody>
                         </table>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">This email was sent based on your action at Learntor App.</p>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Learntor Team</p>
+                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">This email was sent based on your action at Learnbase App.</p>
+                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Learnbase Team</p>
                       </td>
                     </tr>
                   </table>
@@ -204,7 +204,7 @@ table[class=body] .article {
                 </tr>
                 <tr>
                   <td class="content-block powered-by" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
-                    Powered by <a href="http://htmlemail.io" style="color: #999999; font-size: 12px; text-align: center; text-decoration: none;">HTMLemail</a>.
+                    Powered by <a href="http://smartu.ng" style="color: #999999; font-size: 12px; text-align: center; text-decoration: none;">Smart-U Consults</a>.
                   </td>
                 </tr>
               </table>

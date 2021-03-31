@@ -3,6 +3,7 @@ const user_courseModel = require("../models/user_course.model");
 const participantModel = require("../models/participant.model");
 
 const cloudinary = require("cloudinary").v2;
+const courseModel = require("../models/course.model");
 
 // cloudinary configuration
 cloudinary.config({
@@ -159,16 +160,32 @@ exports.getCourse = (req, res) => {
 exports.getUserCourse = (req, res) => {
   user_courseModel
     .findOne({ course: req.params.courseId })
-    .then((course) => {
-      if (!course) {
-        return res.status(404).send({
-          message: "Course not found with id " + req.params.courseId,
+    .then((cor) => {
+      courseModel
+        .findById(cor.course)
+        .then((course) => {
+          if (!course) {
+            return res.status(404).send({
+              message: "Course not found with id " + cor._id,
+            });
+          }
+          res.status(200).send({
+            message: "Successful",
+            course,
+          });
+        })
+        .catch((err) => {
+          if (err.kind === "ObjectId") {
+            return res.status(404).send({
+              message: "Course not found with id " + cor._id,
+              err,
+            });
+          }
+          return res.status(500).send({
+            message: "Error retrieving Course with id " + cor._id,
+            err,
+          });
         });
-      }
-      res.status(200).send({
-        message: "Successful",
-        course,
-      });
     })
     .catch((err) => {
       if (err.kind === "ObjectId") {
@@ -184,13 +201,21 @@ exports.getUserCourse = (req, res) => {
     });
 };
 
+//
+
 exports.getUserCourses = (req, res) => {
   user_courseModel
     .find({ user: req.query.user })
-    .then((courses) => {
-      res.status(200).send({
-        message: "Successful",
-        courses,
+    .then((cors) => {
+      var ids = cors.map(function (cor) {
+        return cor.course;
+      });
+
+      courseModel.find({ _id: { $in: ids } }).then((courses) => {
+        res.status(200).send({
+          message: "Successful",
+          courses,
+        });
       });
     })
     .catch((err) => {

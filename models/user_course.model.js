@@ -2,45 +2,7 @@ const mongoose = require("mongoose");
 
 const UserCourseSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: [true, "Please provide course title!"],
-    },
-
-    courseCode: {
-      type: String,
-    },
-
     course: {
-      type: String,
-    },
-
-    institute: {
-      type: String,
-      required: [true, "No institution specified"],
-    },
-
-    instituteName: {
-      type: String,
-    },
-
-    cover: {
-      type: Object,
-    },
-
-    startDate: {
-      type: Date,
-    },
-
-    endDate: {
-      type: Date,
-    },
-
-    disabled: {
-      type: Boolean,
-    },
-
-    desc: {
       type: String,
     },
     progress: {

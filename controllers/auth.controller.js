@@ -111,42 +111,58 @@ exports.forgotPassword = (request, response) => {
   // Find user and update resetCode with the request body
   const code = makeRef(4);
 
-  User.updateOne(
-    { email: request.body.email },
-    {
-      resetCode: code,
-    },
-    { new: true }
-  )
-    .then((user) => {
-      console.log(request.body.email);
-      if (!user) {
+  User.findOne({ email: request.body.email })
+    .then((res) => {
+      if (res) {
+        User.updateOne(
+          { email: request.body.email },
+          {
+            resetCode: code,
+          },
+          { new: true }
+        )
+          .then((user) => {
+            console.log(request.body.email);
+            if (!user) {
+              return response.status(404).send({
+                message: "No user associated with this email",
+              });
+            } else {
+              sendEmail(
+                request.body.email,
+                "Password Reset Code",
+                `Your password reset code is <b>${code}<b/>`
+              );
+
+              response.status(200).send({
+                message: "Reset code sent, check your email",
+                status: true,
+                code,
+              });
+            }
+          })
+          .catch((err) => {
+            if (err.kind === "ObjectId") {
+              return response.status(404).send({
+                message: "No user associated with this email",
+                err,
+              });
+            }
+
+            return response.status(500).send({
+              message: "Error sending reset code",
+              err,
+            });
+          });
+      } else {
         return response.status(404).send({
           message: "No user associated with this email",
         });
       }
-      sendEmail(
-        request.body.email,
-        "Password Reset Code",
-        `Your password reset code is <b>${code}<b/>`
-      );
-
-      response.status(200).send({
-        message: "Reset code sent, check your email",
-        status: true,
-        code,
-      });
     })
-    .catch((err) => {
-      if (err.kind === "ObjectId") {
-        return response.status(404).send({
-          message: "No user associated with this email",
-          err,
-        });
-      }
-
-      return response.status(500).send({
-        message: "Error sending reset code",
+    .catch((er) => {
+      return response.status(404).send({
+        message: "No user associated with this email",
         err,
       });
     });
@@ -166,7 +182,7 @@ exports.verifyCode = (request, response) => {
     })
     .catch((e) => {
       response.status(404).send({
-        message: "Code could not be verified",
+        message: "Invalid reset code supplied.",
         e,
       });
     });
@@ -239,19 +255,7 @@ exports.registerCourse = (request, response) => {
                   });
 
                   const UserCouse = new user_courseModel({
-                    title: course.title,
                     course: course._id,
-                    courseCode: course.courseCode,
-                    institute: course.institute,
-                    instituteName: course.instituteName,
-                    startDate: course.startDate,
-                    endDate: course.endDate,
-                    disabled: false,
-                    desc: course.desc,
-                    cover: {
-                      url: course.cover.url,
-                      type: course.cover.type,
-                    },
                     user: request.body.user,
                   });
                   participant
