@@ -23,6 +23,8 @@ require("./routes/module.routes")(app);
 require("./routes/excerise.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/project.routes")(app);
+require("./routes/unit.routes")(app);
+require("./routes/comment.routes")(app);
 
 // define a simple route
 app.get("/", (req, res) => {
